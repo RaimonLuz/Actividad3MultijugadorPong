@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "MyMatchManagerSO", menuName = "Tenis Scriptable Objects/MyMatchManagerSO")]
@@ -25,18 +26,41 @@ public class GameManagerSO : ScriptableObject
         North
     }
 
+    private BallController currentBallController;
+
+    public void SetCurrentBallController(BallController ballController)
+    {
+        if(currentBallController == null)
+        {
+            currentBallController = ballController;
+        }
+    }
+
+
+    public BallController GetCurrentBallController() 
+    { 
+        return currentBallController;
+    }
+
+    public event Action<Vector3> OnShotBall;
+
+    public void NotifyShotBall(Vector3 targetPosition)
+    {
+        OnShotBall?.Invoke(targetPosition);
+    }
+
     public static Vector3 GetRandomPositionInsideCourtSide(CourtSides targetSide, float internalMargin)
     {
         float z = 0f;
         float y = COURT_GROUND_Y;
-        float x = Random.Range(COURT_GROUND_MIN_X + internalMargin, COURT_GROUND_MAX_X - internalMargin);
+        float x = UnityEngine.Random.Range(COURT_GROUND_MIN_X + internalMargin, COURT_GROUND_MAX_X - internalMargin);
         
         if (targetSide == CourtSides.South) { 
-            z = Random.Range(COURT_GROUND_MIN_Z + internalMargin, COURT_GROUND_CENTER_Z - internalMargin);
+            z = UnityEngine.Random.Range(COURT_GROUND_MIN_Z + internalMargin, COURT_GROUND_CENTER_Z - internalMargin);
         }
         else
         {
-            z = Random.Range(COURT_GROUND_CENTER_Z + internalMargin, COURT_GROUND_MAX_Z - internalMargin);
+            z = UnityEngine.Random.Range(COURT_GROUND_CENTER_Z + internalMargin, COURT_GROUND_MAX_Z - internalMargin);
         }
 
         return new Vector3(x, y, z);
