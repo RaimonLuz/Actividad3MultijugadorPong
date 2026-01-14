@@ -44,8 +44,18 @@ public class PlayerController : MonoBehaviour
     {
         if (Vector3.Distance(transform.position, ballController.gameObject.transform.position) < hitRange)
         { 
-            ballController.ApplyShot(transform.position, shotPower);
+            ballController.ApplyShot(GetTargetPoint());
         }
+    }
+
+    Vector3 GetTargetPoint()
+    {
+        GameManagerSO.CourtSides playerCourtSide = GameManagerSO.GetCourtSideFromPosition(transform.position);
+        GameManagerSO.CourtSides targetCourtSide = GameManagerSO.GetOppositeCourtSide(playerCourtSide);
+        float internalMargin = 1f;
+
+        return GameManagerSO.GetRandomPositionInsideCourtSide(targetCourtSide, internalMargin);
+
     }
 
 
