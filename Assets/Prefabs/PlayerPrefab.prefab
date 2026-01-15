@@ -103,6 +103,8 @@ GameObject:
   - component: {fileID: 4357705016599973196}
   - component: {fileID: 3925675645665161587}
   - component: {fileID: 2510059069129614252}
+  - component: {fileID: -3952694731627396068}
+  - component: {fileID: 6665741790350206746}
   m_Layer: 0
   m_Name: PlayerPrefab
   m_TagString: Untagged
@@ -138,7 +140,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47c0d4cbbb440d74790d03ee5de1a696, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  ballController: {fileID: 0}
+  gameManagerSO: {fileID: 11400000, guid: fe4c683ca7c5edc48967a29566d78f6e, type: 2}
   maxMoveSpeed: 5
   hitRange: 3
   shotPower: 2.5
@@ -191,7 +193,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 0
+  GlobalObjectIdHash: 410119681
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -204,6 +206,34 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &-3952694731627396068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6669797141403170977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b23c95f418e4386449027c887eb2b653, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HelloWorld.HelloWorldPlayer
+  ShowTopMostFoldoutHeaderGroup: 1
+  Position:
+    m_InternalValue: {x: 0, y: 0, z: 0}
+--- !u!114 &6665741790350206746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6669797141403170977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c7abb68223d94543bd562f538fbc809, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RpcTest
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &7276468065281062044
 GameObject:
   m_ObjectHideFlags: 0

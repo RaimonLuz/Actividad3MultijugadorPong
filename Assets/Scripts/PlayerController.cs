@@ -5,7 +5,8 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
 
-    [SerializeField] private BallController ballController;
+    [SerializeField] private GameManagerSO gameManagerSO;
+    
 
     [SerializeField][Range(1f, 10f)] float maxMoveSpeed = 5f;
     [SerializeField][Range(1f, 10f)] float hitRange = 5f;
@@ -16,6 +17,7 @@ public class PlayerController : MonoBehaviour
     private Transform cameraTransform;
     private InputController inputController;
     private CharacterController characterController;
+    private BallController ballController => gameManagerSO.GetCurrentBallController();
 
     private void Awake()
     {

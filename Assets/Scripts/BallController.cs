@@ -1,16 +1,42 @@
+using TMPro;
 using UnityEngine;
 
 public class BallController : MonoBehaviour
 {
 
+    [SerializeField] private GameManagerSO gameManagerSO;
+
     const float NET_HEIGHT_WITH_MARGIN = GameManagerSO.NET_HEIGHT + 2f;
     private Rigidbody rb;
+
+
+    private void Awake()
+    {
+        gameManagerSO.SetCurrentBallController(this);
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rb = GetComponent<Rigidbody>();
     }
+
+    private void OnEnable()
+    {
+        gameManagerSO.OnShotBall += HandleShotBall;
+    }
+    private void OnDisable()
+    {
+        gameManagerSO.OnShotBall -= HandleShotBall;
+    }
+
+    private void HandleShotBall(Vector3 targetPosition)
+    {
+        // Handle the event here
+        ApplyShot(targetPosition);
+
+    }
+
 
     public void ApplyShot(Vector3 targetPosition) 
     {
