@@ -994,7 +994,6 @@ GameObject:
   - component: {fileID: 2122414428}
   - component: {fileID: 2122414427}
   - component: {fileID: 2122414426}
-  - component: {fileID: 2122414429}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -1088,18 +1087,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2122414429
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2122414425}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b19fe5e47ad436489361cf69f4a18ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HelloWorldManager
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
