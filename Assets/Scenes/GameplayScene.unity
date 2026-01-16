@@ -1100,7 +1100,15 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Esperando a que otro jugador se una a la partida
+  m_text: 'Esperando a que otro jugador se una a la partida.
+
+
+    Controles:
+
+    -
+    Teclas WASD para mover
+
+    - Space para golpear la bola'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1691,7 +1699,7 @@ GameObject:
   - component: {fileID: 1132830690}
   - component: {fileID: 1132830689}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Text (TMP) PlayerReady
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1860,8 +1868,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e02fe6eede6bdc4da985c0a29190ce6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
+  matchManagerSO: {fileID: 11400000, guid: fe4c683ca7c5edc48967a29566d78f6e, type: 2}
   panelWaitForPlayerConnected: {fileID: 283415023}
   panelWaitForPlayerReady: {fileID: 354460004}
+  textWaitForPlayerReady: {fileID: 1132830689}
   panelPlaying: {fileID: 1473017555}
   panelPaused: {fileID: 607693433}
   panelGameOver: {fileID: 1071659519}

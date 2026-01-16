@@ -24,6 +24,11 @@ public class LocalPlayerPredictionMoventControllerNB : NetworkBehaviour
         // Only the owner of this object should control its movement
         if (!IsOwner) return;
 
+        if(playerController.CachedGameState != GameState.Playing)
+        {
+            return;
+        }
+
         // Movement local prediction
         Vector3 move = new Vector3(
             input.MoveInput.x,

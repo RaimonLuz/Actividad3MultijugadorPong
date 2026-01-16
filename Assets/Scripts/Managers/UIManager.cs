@@ -1,12 +1,20 @@
+using System;
+using TMPro;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
+    [SerializeField] private MatchManagerSO matchManagerSO;
+
+    [Header("Panels")]
     [SerializeField] private GameObject panelWaitForPlayerConnected;
     [SerializeField] private GameObject panelWaitForPlayerReady;
     [SerializeField] private GameObject panelPlaying;
     [SerializeField] private GameObject panelPaused;
     [SerializeField] private GameObject panelGameOver;
+
+    [Header("Texts")]
+    [SerializeField] private String waitForOtherPlayerReadyText = "¡Genial estás apunto! Espera a que el otro jugador esté apunto...";
 
     private enum PanelsOnScreen
     {
@@ -25,11 +33,24 @@ public class UIManager : MonoBehaviour
 
     private void OnEnable()
     {
+        // Subscribe to MatchManagerSO's events
+        matchManagerSO.OnThisPlayerIsReady += HandleOnThisPlayerIsReady;
+
+        // Subscribe to GameManagerNB's events
         GameManagerNB.OnGameStateChanged += HandleOnGameStateChanged;
     }
     private void OnDisable()
     {
+        // Unsubscribe from MatchManagerSO's events
+        matchManagerSO.OnThisPlayerIsReady -= HandleOnThisPlayerIsReady;
+
+        // Unsubscribe from MatchManagerSO's events
         GameManagerNB.OnGameStateChanged -= HandleOnGameStateChanged;
+    }
+
+    private void HandleOnThisPlayerIsReady()
+    {
+        panelWaitForPlayerReady.GetComponentInChildren<TextMeshProUGUI>().text = waitForOtherPlayerReadyText;
     }
 
     private void HandleOnGameStateChanged(GameState newGameState)

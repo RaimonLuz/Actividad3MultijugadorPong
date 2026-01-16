@@ -243,10 +243,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   ShowTopMostFoldoutHeaderGroup: 1
-  gameManagerSO: {fileID: 11400000, guid: fe4c683ca7c5edc48967a29566d78f6e, type: 2}
+  matchManagerSO: {fileID: 11400000, guid: fe4c683ca7c5edc48967a29566d78f6e, type: 2}
   maxMoveSpeed: 5
   hitRange: 3
   NV_VisualType:
+    m_InternalValue: 0
+  NV_playerCourtSide:
+    m_InternalValue: 0
+  NV_IsReady:
     m_InternalValue: 0
 --- !u!114 &4357705016599973196
 MonoBehaviour:

@@ -47,6 +47,7 @@ public class PlayerControllerNB : NetworkBehaviour
     private BallController ballController => matchManagerSO.GetCurrentBallController();
 
     public float MaxMoveSpeed { get => maxMoveSpeed; }
+    public GameState CachedGameState { get => cachedGameState; }
 
     private void Awake()
     {
@@ -71,11 +72,6 @@ public class PlayerControllerNB : NetworkBehaviour
         GameManagerNB.OnGameStateChanged -= HandleOnGameStateChanged;
     }
 
-    private void HandleOnGameStateChanged(GameState newState)
-    {
-        cachedGameState = newState;
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -93,8 +89,29 @@ public class PlayerControllerNB : NetworkBehaviour
         NV_VisualType.OnValueChanged += OnVisualChanged;
         OnVisualChanged(NV_VisualType.Value, NV_VisualType.Value);
 
-        
+        // Subscribe to ready state changes (on server)
+        NV_IsReady.OnValueChanged += HandleReadyChanged;
     }
+
+    private void HandleReadyChanged(bool oldValue, bool newValue)
+    {
+        // Only the owner of this object
+        if (!IsOwner)
+            return;
+
+        // When set to ready, notify the match manager locally
+        if (newValue)
+        {
+            matchManagerSO.NotifyThisPlayerIsReady();
+        }
+    }
+
+    private void HandleOnGameStateChanged(GameState newState)
+    {
+        cachedGameState = newState;
+    }
+
+    
 
     private void OnVisualChanged(PlayerVisualType oldVal, PlayerVisualType newVal)
     {
@@ -105,15 +122,40 @@ public class PlayerControllerNB : NetworkBehaviour
     [ServerRpc]
     private void MovePlayerServerRpc(Vector2 input, ServerRpcParams rpcParams = default)
     {
-        Vector3 direction = GetInputDirection(input);
+        if (cachedGameState == GameState.WaitingForAllPlayersConnected)
+        {
+            RotatePlayer(input);
+        }
+        else if (cachedGameState == GameState.Playing)
+        {
+            MovePlayer(input);
+        }
+    }
 
+    private void RotatePlayer(Vector2 input)
+    { 
+        float threshold = 0.1f;
+        float turnSpeed = 100f;
+
+        if (MathF.Abs(input.x) > 0f + threshold)
+        {
+            transform.Rotate(Vector3.up * Time.deltaTime * turnSpeed * input.x);
+        }
+        else if (MathF.Abs(input.y) > 0f + threshold)
+        {
+            transform.Rotate(Vector3.up * Time.deltaTime * turnSpeed * input.y);
+        }
+    }
+
+
+    private void MovePlayer(Vector2 input)
+    {
+        Vector3 direction = GetInputDirection(input);
         // Movement
         Vector3 move = direction * maxMoveSpeed * Time.deltaTime;
         characterController.Move(move);
-
         // Gravity
         HandleGravity();
-
         // Clamp to court
         ClampPlayerToCourt();
     }
@@ -164,16 +206,32 @@ public class PlayerControllerNB : NetworkBehaviour
         if (!IsOwner) return;
 
         // When not playing, set player as ready
-        if (cachedGameState != GameState.Playing)
+        if (cachedGameState == GameState.WaitingForAllPlayersReady && NV_IsReady.Value == false)
         {
             RequestReadyServerRpc();
             return;
         }
 
+        if(cachedGameState == GameState.Playing)
+        {
+            TryHitBall();
+        }
+    }
+
+    void TryHitBall()
+    {
+
         // When playing, try to hit the ball
         if (Vector3.Distance(transform.position, ballController.gameObject.transform.position) < hitRange)
         {
             ballController.ApplyShot(GetTargetPoint());
+        }
+
+        float distanceToBall = Vector3.Distance(transform.position, ballController.transform.position);
+        if (distanceToBall <= hitRange)
+        {
+            Vector3 targetPoint = GetTargetPoint();
+            matchManagerSO.NotifyShotBall(targetPoint);
         }
     }
 

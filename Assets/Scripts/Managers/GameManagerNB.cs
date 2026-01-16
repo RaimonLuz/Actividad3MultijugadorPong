@@ -75,7 +75,8 @@ public class GameManagerNB : NetworkBehaviour
         CourtSides courtSide = spawnedPlayers.Count == 0 ? CourtSides.North : CourtSides.South;
 
         // Instantiate and spawn the player object
-        GameObject playerObj = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
+        Vector3 spawnPosition = new Vector3(spawnPoint.position.x, playerPrefab.GetComponent<CharacterController>().height / 2f, spawnPoint.position.z);
+        GameObject playerObj = Instantiate(playerPrefab, spawnPosition, spawnPoint.rotation);
         playerObj.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
 
         // Set the player's visual type
@@ -83,6 +84,10 @@ public class GameManagerNB : NetworkBehaviour
         playerController.NV_VisualType.Value = visualType;
         // Set the player's court side
         playerController.NV_playerCourtSide.Value = courtSide;
+        // Set player is not ready initially
+        playerController.NV_IsReady.Value = false;
+        // Subscribe to player's ready state changes
+        playerController.NV_IsReady.OnValueChanged += OnPlayerReadyChanged;
 
         // Track the spawned player
         spawnedPlayers.Add(clientId, playerObj);
@@ -97,13 +102,29 @@ public class GameManagerNB : NetworkBehaviour
         }
     }
 
-    // TODO use this from player can request start match ???
-    [ServerRpc]
-    public void RequestStartMatchServerRpc()
+
+    private void OnPlayerReadyChanged(bool oldValue, bool newValue)
     {
-        if (NV_GameState.Value != GameState.WaitingForAllPlayersConnected)
+        if (!IsServer)
             return;
+
+        if (newValue)
+            CheckAllPlayersReady();
+    }
+
+    private void CheckAllPlayersReady()
+    {
+        if (NV_GameState.Value != GameState.WaitingForAllPlayersReady)
+            return;
+
+        foreach (var player in spawnedPlayers.Values)
+        {
+            var pc = player.GetComponent<PlayerControllerNB>();
+            if (!pc.NV_IsReady.Value)
+                return;
+        }
 
         NV_GameState.Value = GameState.Playing;
     }
+
 }
