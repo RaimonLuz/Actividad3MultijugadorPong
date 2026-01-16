@@ -1,3 +1,4 @@
+using HathoraCloud.Models.Operations;
 using System;
 using Unity.Netcode;
 using Unity.Netcode.Components;
@@ -10,7 +11,7 @@ using static MatchManagerSO;
 public class PlayerControllerNB : NetworkBehaviour
 {
     [Header("References")]
-    [SerializeField] private MatchManagerSO gameManagerSO;
+    [SerializeField] private MatchManagerSO matchManagerSO;
 
     [Header("Settings")]
     [SerializeField][Range(1f, 10f)] float maxMoveSpeed = 5f;
@@ -23,14 +24,27 @@ public class PlayerControllerNB : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
+    //... Court Side
+    public NetworkVariable<CourtSides> NV_playerCourtSide = new(
+        default,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+    //... Player is ready?
+    public NetworkVariable<bool> NV_IsReady = new(
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
 
 
     // variables
+    private GameState cachedGameState;
     private Vector3 verticalVelocity;
     private Transform cameraTransform;
     private InputController inputController;
     private CharacterController characterController;
-    private BallController ballController => gameManagerSO.GetCurrentBallController();
+    private BallController ballController => matchManagerSO.GetCurrentBallController();
 
     public float MaxMoveSpeed { get => maxMoveSpeed; }
 
@@ -48,11 +62,18 @@ public class PlayerControllerNB : NetworkBehaviour
 
     private void OnEnable()
     {
-        inputController.OnShot += OnShot;
+        inputController.OnShot += HandleOnShot;
+        GameManagerNB.OnGameStateChanged += HandleOnGameStateChanged;
     }
     private void OnDisable()
     {
-        inputController.OnShot -= OnShot;
+        inputController.OnShot -= HandleOnShot;
+        GameManagerNB.OnGameStateChanged -= HandleOnGameStateChanged;
+    }
+
+    private void HandleOnGameStateChanged(GameState newState)
+    {
+        cachedGameState = newState;
     }
 
     // Update is called once per frame
@@ -65,10 +86,14 @@ public class PlayerControllerNB : NetworkBehaviour
         MovePlayerServerRpc(input);
     }
 
+    // This method is called when the object is spawned on the network
     public override void OnNetworkSpawn()
     {
+        // Subscribe to visual type changes and apply the initial visual
         NV_VisualType.OnValueChanged += OnVisualChanged;
         OnVisualChanged(NV_VisualType.Value, NV_VisualType.Value);
+
+        
     }
 
     private void OnVisualChanged(PlayerVisualType oldVal, PlayerVisualType newVal)
@@ -133,12 +158,32 @@ public class PlayerControllerNB : NetworkBehaviour
             characterController.Move(correction);
     }
 
-    private void OnShot()
+    private void HandleOnShot()
     {
+        // Only the owner of this object should handle shots
+        if (!IsOwner) return;
+
+        // When not playing, set player as ready
+        if (cachedGameState != GameState.Playing)
+        {
+            RequestReadyServerRpc();
+            return;
+        }
+
+        // When playing, try to hit the ball
         if (Vector3.Distance(transform.position, ballController.gameObject.transform.position) < hitRange)
         {
             ballController.ApplyShot(GetTargetPoint());
         }
+    }
+
+    [ServerRpc]
+    private void RequestReadyServerRpc(ServerRpcParams rpcParams = default)
+    {
+        if (NV_IsReady.Value)
+            return;
+
+        NV_IsReady.Value = true;
     }
 
     Vector3 GetTargetPoint()

@@ -135,7 +135,6 @@ GameObject:
   - component: {fileID: 8355144997268134836}
   - component: {fileID: 4357705016599973196}
   - component: {fileID: 3925675645665161587}
-  - component: {fileID: 4314962970652308236}
   m_Layer: 0
   m_Name: PlayerPrefab
   m_TagString: Untagged
@@ -286,22 +285,6 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &4314962970652308236
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6669797141403170977}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89ce98c3a24880944b0fd351d64ced03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerCameraController
-  ShowTopMostFoldoutHeaderGroup: 1
-  matchManagerSO: {fileID: 11400000, guid: fe4c683ca7c5edc48967a29566d78f6e, type: 2}
-  playerCourtSide:
-    m_InternalValue: 0
 --- !u!1 &7276468065281062044
 GameObject:
   m_ObjectHideFlags: 0

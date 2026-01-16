@@ -26,7 +26,7 @@ public class MatchManagerSO : ScriptableObject
 
     // Events
     public event Action<Vector3> OnShotBall;
-    public event Action<CourtSides> OnActivateCamera;
+    public event Action<CamerasViewsEnum> OnActivateCamera;
 
 
     public void SetCurrentBallController(BallController ballController)
@@ -49,9 +49,9 @@ public class MatchManagerSO : ScriptableObject
         OnShotBall?.Invoke(targetPosition);
     }
 
-    public void NotifyActivateCamera(CourtSides cameraSide)
+    public void NotifyActivateCamera(CamerasViewsEnum cameraView)
     {
-        OnActivateCamera?.Invoke(cameraSide);
+        OnActivateCamera?.Invoke(cameraView);
     }
 
 
