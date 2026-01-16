@@ -4,9 +4,9 @@ using UnityEngine;
 public class BallController : MonoBehaviour
 {
 
-    [SerializeField] private GameManagerSO gameManagerSO;
+    [SerializeField] private MatchManagerSO gameManagerSO;
 
-    const float NET_HEIGHT_WITH_MARGIN = GameManagerSO.NET_HEIGHT + 2f;
+    const float NET_HEIGHT_WITH_MARGIN = MatchManagerSO.NET_HEIGHT + 2f;
     private Rigidbody rb;
 
 

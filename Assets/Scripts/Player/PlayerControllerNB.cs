@@ -5,16 +5,21 @@ using UnityEditor;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
-[RequireComponent(typeof(NetworkObject))]
 [RequireComponent(typeof(AnticipatedNetworkTransform))]
-public class PlayerController : NetworkBehaviour
+public class PlayerControllerNB : NetworkBehaviour
 {
     [Header("References")]
-    [SerializeField] private GameManagerSO gameManagerSO;
+    [SerializeField] private MatchManagerSO gameManagerSO;
 
     [Header("Settings")]
     [SerializeField][Range(1f, 10f)] float maxMoveSpeed = 5f;
     [SerializeField][Range(1f, 10f)] float hitRange = 5f;
+
+    public NetworkVariable<PlayerVisualType> NV_VisualType = new(
+    PlayerVisualType.Blue,
+    NetworkVariableReadPermission.Everyone,
+    NetworkVariableWritePermission.Server
+);
 
     // variables
     private Vector3 verticalVelocity;
@@ -22,6 +27,8 @@ public class PlayerController : NetworkBehaviour
     private InputController inputController;
     private CharacterController characterController;
     private BallController ballController => gameManagerSO.GetCurrentBallController();
+
+    public float MaxMoveSpeed { get => maxMoveSpeed; }
 
     private void Awake()
     {
@@ -52,6 +59,17 @@ public class PlayerController : NetworkBehaviour
 
         Vector2 input = inputController.MoveInput;
         MovePlayerServerRpc(input);
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        NV_VisualType.OnValueChanged += OnVisualChanged;
+        OnVisualChanged(NV_VisualType.Value, NV_VisualType.Value);
+    }
+
+    private void OnVisualChanged(PlayerVisualType oldVal, PlayerVisualType newVal)
+    {
+        GetComponentInChildren<PlayerVisual>()?.ApplyVisual(newVal);
     }
 
 
@@ -98,12 +116,12 @@ public class PlayerController : NetworkBehaviour
     {
         Vector3 clampedPos = transform.position;
 
-        clampedPos.x = Mathf.Clamp(clampedPos.x, GameManagerSO.COURT_GROUND_MIN_X, GameManagerSO.COURT_GROUND_MAX_X);
+        clampedPos.x = Mathf.Clamp(clampedPos.x, MatchManagerSO.COURT_GROUND_MIN_X, MatchManagerSO.COURT_GROUND_MAX_X);
 
-        if (GameManagerSO.GetCourtSideFromPosition(transform.position) == GameManagerSO.CourtSides.North)
-            clampedPos.z = Mathf.Clamp(clampedPos.z, GameManagerSO.COURT_GROUND_CENTER_Z, GameManagerSO.COURT_GROUND_MAX_Z);
+        if (MatchManagerSO.GetCourtSideFromPosition(transform.position) == MatchManagerSO.CourtSides.North)
+            clampedPos.z = Mathf.Clamp(clampedPos.z, MatchManagerSO.COURT_GROUND_CENTER_Z, MatchManagerSO.COURT_GROUND_MAX_Z);
         else
-            clampedPos.z = Mathf.Clamp(clampedPos.z, GameManagerSO.COURT_GROUND_MIN_Z, GameManagerSO.COURT_GROUND_CENTER_Z);
+            clampedPos.z = Mathf.Clamp(clampedPos.z, MatchManagerSO.COURT_GROUND_MIN_Z, MatchManagerSO.COURT_GROUND_CENTER_Z);
 
         // Apply correction
         Vector3 correction = clampedPos - transform.position;
@@ -121,11 +139,11 @@ public class PlayerController : NetworkBehaviour
 
     Vector3 GetTargetPoint()
     {
-        GameManagerSO.CourtSides playerCourtSide = GameManagerSO.GetCourtSideFromPosition(transform.position);
-        GameManagerSO.CourtSides targetCourtSide = GameManagerSO.GetOppositeCourtSide(playerCourtSide);
+        MatchManagerSO.CourtSides playerCourtSide = MatchManagerSO.GetCourtSideFromPosition(transform.position);
+        MatchManagerSO.CourtSides targetCourtSide = MatchManagerSO.GetOppositeCourtSide(playerCourtSide);
         float internalMargin = 1f;
 
-        return GameManagerSO.GetRandomPositionInsideCourtSide(targetCourtSide, internalMargin);
+        return MatchManagerSO.GetRandomPositionInsideCourtSide(targetCourtSide, internalMargin);
 
     }
 

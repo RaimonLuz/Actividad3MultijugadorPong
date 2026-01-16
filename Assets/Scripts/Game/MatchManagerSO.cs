@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "MyMatchManagerSO", menuName = "Tenis Scriptable Objects/MyMatchManagerSO")]
-public class GameManagerSO : ScriptableObject
+public class MatchManagerSO : ScriptableObject
 {
     // The x line of the court ground
     public const float COURT_GROUND_MIN_X = -5f;
