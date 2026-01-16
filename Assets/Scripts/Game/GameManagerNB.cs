@@ -27,6 +27,8 @@ public class GameManagerNB : NetworkBehaviour
         // Determine spawn point and visual type based on existing players
         Transform spawnPoint = spawnedPlayers.Count == 0 ? northSpawn : southSpawn;
         PlayerVisualType visualType = spawnedPlayers.Count == 0 ? PlayerVisualType.Blue : PlayerVisualType.Red;
+        CourtSides courtSide = spawnedPlayers.Count == 0 ? CourtSides.North : CourtSides.South;
+
 
         // Instantiate and spawn the player object
         GameObject playerObj = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
@@ -35,6 +37,10 @@ public class GameManagerNB : NetworkBehaviour
         // Set the player's visual type
         PlayerControllerNB playerController = playerObj.GetComponent<PlayerControllerNB>();
         playerController.NV_VisualType.Value = visualType;
+
+        // Set the player's court side for camera control
+        PlayerCameraControllerNB playerCameraController = playerObj.GetComponent<PlayerCameraControllerNB>();
+        playerCameraController.playerCourtSide.Value = courtSide;
 
         // Track the spawned player
         spawnedPlayers.Add(clientId, playerObj);

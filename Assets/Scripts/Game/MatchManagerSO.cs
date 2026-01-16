@@ -4,6 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "MyMatchManagerSO", menuName = "Tenis Scriptable Objects/MyMatchManagerSO")]
 public class MatchManagerSO : ScriptableObject
 {
+    // Constants
     // The x line of the court ground
     public const float COURT_GROUND_MIN_X = -5f;
     public const float COURT_GROUND_MAX_X = 5f;
@@ -20,13 +21,13 @@ public class MatchManagerSO : ScriptableObject
     // court height
     public const float COURT_GROUND_Y = 0f;
 
-    public enum CourtSides
-    {
-        South,
-        North
-    }
-
+    // Variables
     private BallController currentBallController;
+
+    // Events
+    public event Action<Vector3> OnShotBall;
+    public event Action<CourtSides> OnActivateCamera;
+
 
     public void SetCurrentBallController(BallController ballController)
     {
@@ -42,12 +43,17 @@ public class MatchManagerSO : ScriptableObject
         return currentBallController;
     }
 
-    public event Action<Vector3> OnShotBall;
 
     public void NotifyShotBall(Vector3 targetPosition)
     {
         OnShotBall?.Invoke(targetPosition);
     }
+
+    public void NotifyActivateCamera(CourtSides cameraSide)
+    {
+        OnActivateCamera?.Invoke(cameraSide);
+    }
+
 
     public static Vector3 GetRandomPositionInsideCourtSide(CourtSides targetSide, float internalMargin)
     {

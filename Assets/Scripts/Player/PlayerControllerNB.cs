@@ -3,6 +3,7 @@ using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEditor;
 using UnityEngine;
+using static MatchManagerSO;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(AnticipatedNetworkTransform))]
@@ -15,11 +16,14 @@ public class PlayerControllerNB : NetworkBehaviour
     [SerializeField][Range(1f, 10f)] float maxMoveSpeed = 5f;
     [SerializeField][Range(1f, 10f)] float hitRange = 5f;
 
+    // Networked variables
+    //... Visual Type
     public NetworkVariable<PlayerVisualType> NV_VisualType = new(
-    PlayerVisualType.Blue,
-    NetworkVariableReadPermission.Everyone,
-    NetworkVariableWritePermission.Server
-);
+        PlayerVisualType.Blue,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
 
     // variables
     private Vector3 verticalVelocity;
@@ -118,7 +122,7 @@ public class PlayerControllerNB : NetworkBehaviour
 
         clampedPos.x = Mathf.Clamp(clampedPos.x, MatchManagerSO.COURT_GROUND_MIN_X, MatchManagerSO.COURT_GROUND_MAX_X);
 
-        if (MatchManagerSO.GetCourtSideFromPosition(transform.position) == MatchManagerSO.CourtSides.North)
+        if (MatchManagerSO.GetCourtSideFromPosition(transform.position) == CourtSides.North)
             clampedPos.z = Mathf.Clamp(clampedPos.z, MatchManagerSO.COURT_GROUND_CENTER_Z, MatchManagerSO.COURT_GROUND_MAX_Z);
         else
             clampedPos.z = Mathf.Clamp(clampedPos.z, MatchManagerSO.COURT_GROUND_MIN_Z, MatchManagerSO.COURT_GROUND_CENTER_Z);
@@ -139,8 +143,8 @@ public class PlayerControllerNB : NetworkBehaviour
 
     Vector3 GetTargetPoint()
     {
-        MatchManagerSO.CourtSides playerCourtSide = MatchManagerSO.GetCourtSideFromPosition(transform.position);
-        MatchManagerSO.CourtSides targetCourtSide = MatchManagerSO.GetOppositeCourtSide(playerCourtSide);
+        CourtSides playerCourtSide = MatchManagerSO.GetCourtSideFromPosition(transform.position);
+        CourtSides targetCourtSide = MatchManagerSO.GetOppositeCourtSide(playerCourtSide);
         float internalMargin = 1f;
 
         return MatchManagerSO.GetRandomPositionInsideCourtSide(targetCourtSide, internalMargin);
