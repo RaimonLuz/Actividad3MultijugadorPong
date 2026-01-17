@@ -38,6 +38,10 @@ public class UIManager : MonoBehaviour
 
         // Subscribe to GameManagerNB's events
         GameManagerNB.OnGameStateChanged += HandleOnGameStateChanged;
+        GameManagerNB.OnPointsPlayerAChanged += HandleOnPointsPlayerAChanged;
+        GameManagerNB.OnPointsPlayerBChanged += HandleOnPointsPlayerBChanged;
+        GameManagerNB.OnGamesPlayerAChanged += HandleOnGamesPlayerAChanged;
+        GameManagerNB.OnGamesPlayerBChanged += HandleOnGamesPlayerBChanged;
     }
     private void OnDisable()
     {
@@ -46,7 +50,34 @@ public class UIManager : MonoBehaviour
 
         // Unsubscribe from MatchManagerSO's events
         GameManagerNB.OnGameStateChanged -= HandleOnGameStateChanged;
+        GameManagerNB.OnPointsPlayerAChanged -= HandleOnPointsPlayerAChanged;
+        GameManagerNB.OnPointsPlayerBChanged -= HandleOnPointsPlayerBChanged;
+        GameManagerNB.OnGamesPlayerAChanged -= HandleOnGamesPlayerAChanged;
+        GameManagerNB.OnGamesPlayerBChanged -= HandleOnGamesPlayerBChanged;
     }
+
+    private void HandleOnPointsPlayerAChanged(int obj)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void HandleOnPointsPlayerBChanged(int obj)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void HandleOnGamesPlayerBChanged(int obj)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void HandleOnGamesPlayerAChanged(int obj)
+    {
+        throw new NotImplementedException();
+    }
+
+
+
 
     private void HandleOnThisPlayerIsReady()
     {

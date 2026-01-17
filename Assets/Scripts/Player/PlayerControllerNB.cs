@@ -36,6 +36,13 @@ public class PlayerControllerNB : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
+    //... Game State PRIVATE, it is a reference to the GameManagerNB's game state variable
+    private NetworkVariable<GameState> nV_gameState_Ref = new(
+        GameState.WaitingForAllPlayersConnected,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
 
 
     // variables
@@ -85,12 +92,33 @@ public class PlayerControllerNB : NetworkBehaviour
     // This method is called when the object is spawned on the network
     public override void OnNetworkSpawn()
     {
-        // Subscribe to visual type changes and apply the initial visual
+        // Subscribe to visual type changes
         NV_VisualType.OnValueChanged += OnVisualChanged;
         OnVisualChanged(NV_VisualType.Value, NV_VisualType.Value);
 
-        // Subscribe to ready state changes (on server)
-        NV_IsReady.OnValueChanged += HandleReadyChanged;
+        // Subscribe to ready state changes (only for owner)
+        if (IsOwner)
+        {
+            NV_IsReady.OnValueChanged += HandleReadyChanged;
+        }
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        // Unsubscribe from visual type changes
+        NV_VisualType.OnValueChanged -= OnVisualChanged;
+
+        // Unsubscribe from ready state changes (only for owner)
+        if (IsOwner)
+        {
+            NV_IsReady.OnValueChanged -= HandleReadyChanged;
+        }
+    }
+
+    public void InitGameState(NetworkVariable<GameState> gameState)
+    {
+        if (!IsServer) return;
+        nV_gameState_Ref = gameState;
     }
 
     private void HandleReadyChanged(bool oldValue, bool newValue)
@@ -122,11 +150,11 @@ public class PlayerControllerNB : NetworkBehaviour
     [ServerRpc]
     private void MovePlayerServerRpc(Vector2 input, ServerRpcParams rpcParams = default)
     {
-        if (cachedGameState == GameState.WaitingForAllPlayersConnected)
+        if (nV_gameState_Ref.Value == GameState.WaitingForAllPlayersConnected)
         {
             RotatePlayer(input);
         }
-        else if (cachedGameState == GameState.Playing)
+        else if (nV_gameState_Ref.Value == GameState.Playing)
         {
             MovePlayer(input);
         }

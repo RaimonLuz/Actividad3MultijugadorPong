@@ -27,10 +27,37 @@ public class GameManagerNB : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
+    // --- Networked Score ---
+    public NetworkVariable<int> NV_PointsPlayerA = new(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    ); // 0,1,2,3 = 0,15,30,40
+    public NetworkVariable<int> NV_PointsPlayerB = new(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+    public NetworkVariable<int> NV_GamesPlayerA = new(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+    public NetworkVariable<int> NV_GamesPlayerB = new(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
 
-    // events
+
+
+    // static events
     public static event Action<GameState> OnGameStateChanged;
-
+    public static event Action<int> OnPointsPlayerAChanged;
+    public static event Action<int> OnPointsPlayerBChanged;
+    public static event Action<int> OnGamesPlayerAChanged;
+    public static event Action<int> OnGamesPlayerBChanged;
+    
 
 
 
@@ -40,6 +67,10 @@ public class GameManagerNB : NetworkBehaviour
         {
             // Subscribe to game state changes
             NV_GameState.OnValueChanged += HandleMatchStateChanged;
+            NV_PointsPlayerA.OnValueChanged += HandlePointsPlayerAChanged;
+            NV_PointsPlayerB.OnValueChanged += HandlePointsPlayerBChanged;
+            NV_GamesPlayerA.OnValueChanged += HandleGamesPlayerAChanged;
+            NV_GamesPlayerB.OnValueChanged += HandleGamesPlayerBChanged;
 
             // Immediately notify local systems on spawn
             HandleMatchStateChanged(NV_GameState.Value, NV_GameState.Value);
@@ -49,8 +80,64 @@ public class GameManagerNB : NetworkBehaviour
         {
             // Only the server should handle client connections
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
         }
     }
+
+    public override void OnNetworkDespawn()
+    {
+        if (IsClient)
+        {
+            NV_GameState.OnValueChanged -= HandleMatchStateChanged;
+            NV_PointsPlayerA.OnValueChanged -= HandlePointsPlayerAChanged;
+            NV_PointsPlayerB.OnValueChanged -= HandlePointsPlayerBChanged;
+            NV_GamesPlayerA.OnValueChanged -= HandleGamesPlayerAChanged;
+            NV_GamesPlayerB.OnValueChanged -= HandleGamesPlayerBChanged;
+        }
+
+        if (IsServer)
+        {
+            foreach (var player in spawnedPlayers.Values)
+            {
+                if (player == null) continue;
+
+                var pc = player.GetComponent<PlayerControllerNB>();
+                if (pc != null)
+                {
+                    pc.NV_IsReady.OnValueChanged -= OnPlayerReadyChanged;
+                }
+            }
+
+            spawnedPlayers.Clear();
+
+            if (NetworkManager.Singleton != null)
+            {
+                NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+                NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+            }
+        }
+    }
+
+    private void OnClientDisconnected(ulong clientId)
+    {
+        if (!spawnedPlayers.TryGetValue(clientId, out var playerObj))
+            return;
+
+        // IMPORTANT Unsubscribe from the player's ready state changes
+        if (playerObj != null)
+        {
+            var playerController = playerObj.GetComponent<PlayerControllerNB>();
+            if (playerController != null)
+            {
+                playerController.NV_IsReady.OnValueChanged -= OnPlayerReadyChanged;
+            }
+        }
+
+        // Remove the player object from the dictionary and decrement player count
+        spawnedPlayers.Remove(clientId);
+        currentPlayerCount--;
+    }
+
 
     private void HandleMatchStateChanged(GameState oldState, GameState newState)
     {
@@ -60,6 +147,41 @@ public class GameManagerNB : NetworkBehaviour
             OnGameStateChanged?.Invoke(newState);
         }
     }
+
+    private void HandlePointsPlayerAChanged(int previousValue, int newValue)
+    {
+        if (IsClient)
+        {
+            OnPointsPlayerAChanged?.Invoke(newValue);
+        }
+    }
+    private void HandlePointsPlayerBChanged(int previousValue, int newValue)
+    {
+        if (IsClient)
+        {
+            OnPointsPlayerBChanged?.Invoke(newValue);
+        }
+    }
+    private void HandleGamesPlayerAChanged(int previousValue, int newValue)
+    {
+        if (IsClient)
+        {
+            OnGamesPlayerAChanged?.Invoke(newValue);
+        }
+    }
+    private void HandleGamesPlayerBChanged(int previousValue, int newValue)
+    {
+        if(IsClient)
+        {
+            OnGamesPlayerBChanged?.Invoke(newValue);
+        }
+    }
+
+
+
+
+
+
 
     private void OnClientConnected(ulong clientId)
     {
@@ -88,6 +210,8 @@ public class GameManagerNB : NetworkBehaviour
         playerController.NV_IsReady.Value = false;
         // Subscribe to player's ready state changes
         playerController.NV_IsReady.OnValueChanged += OnPlayerReadyChanged;
+
+        playerController.InitGameState(NV_GameState);
 
         // Track the spawned player
         spawnedPlayers.Add(clientId, playerObj);
