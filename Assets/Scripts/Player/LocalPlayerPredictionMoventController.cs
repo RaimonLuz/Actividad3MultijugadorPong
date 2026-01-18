@@ -1,7 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
-public class LocalPlayerPredictionMoventControllerNB : NetworkBehaviour
+public class LocalPlayerPredictionMoventController : MonoBehaviour
 {
     [SerializeField][Range(1f, 30f)] private float reconciliationLerpSpeed = 15f;
 
@@ -21,13 +21,12 @@ public class LocalPlayerPredictionMoventControllerNB : NetworkBehaviour
         // Ensure input is available
         if (!input) return;
 
-        // Only the owner of this object should control its movement
-        if (!IsOwner) return;
-
-        if(playerController.CachedGameState != GameState.Playing)
+        /*
+        if(playerController.NV_gameState_Ref.Value != GameState.PlayingServe)
         {
             return;
         }
+        */
 
         // Movement local prediction
         Vector3 move = new Vector3(

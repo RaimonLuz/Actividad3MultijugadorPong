@@ -1,31 +1,18 @@
 using UnityEngine;
 using Unity.Netcode;
 
-public class PlayerVisual : NetworkBehaviour
+public class PlayerVisual : MonoBehaviour
 {
     [SerializeField] private PlayerVisualDatabaseSO playerVisualDatabaseSO;
     [SerializeField] private MeshRenderer eyesMeshRenderer;
     //[SerializeField] private SkinnedMeshRenderer skinMeshRenderer;
     //[SerializeField] private Animator animator;
 
-    private PlayerControllerNB playerController;
     private MeshRenderer skinMeshRenderer;
 
     private void Awake()
     {
-        playerController = GetComponentInParent<PlayerControllerNB>();
         skinMeshRenderer = GetComponent<MeshRenderer>();
-    }
-
-    public override void OnNetworkSpawn()
-    {
-        ApplyVisual(playerController.NV_VisualType.Value);
-        playerController.NV_VisualType.OnValueChanged += OnVisualChanged;
-    }
-
-    private void OnVisualChanged(PlayerVisualType oldType, PlayerVisualType newType)
-    {
-        ApplyVisual(newType);
     }
 
     public void ApplyVisual(PlayerVisualType type)

@@ -12,9 +12,20 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject panelPlaying;
     [SerializeField] private GameObject panelPaused;
     [SerializeField] private GameObject panelGameOver;
+    [Header("Text References")]
+    [SerializeField] private TextMeshProUGUI playerAServeText;
+    [SerializeField] private TextMeshProUGUI playerBServeText;
+    [SerializeField] private TextMeshProUGUI pointsPlayerAText;
+    [SerializeField] private TextMeshProUGUI pointsPlayerBText;
+    [SerializeField] private TextMeshProUGUI gamesPlayerAText;
+    [SerializeField] private TextMeshProUGUI gamesPlayerBText;
+    [SerializeField] private TextMeshProUGUI hudHintText;
 
     [Header("Texts")]
-    [SerializeField] private String waitForOtherPlayerReadyText = "¡Genial estás apunto! Espera a que el otro jugador esté apunto...";
+    [SerializeField][Multiline] private string waitForOtherPlayerReadyMessage = "¡Genial estás apunto! Espera a que el otro jugador esté apunto...";
+    [SerializeField][Multiline] private string waitForOtherPlayerServeMessage = "Esperando a que el otro jugador saque";
+    [SerializeField][Multiline] private string playerMustServeMessage = "Pulsa Space para sacar";
+
 
     private enum PanelsOnScreen
     {
@@ -56,32 +67,42 @@ public class UIManager : MonoBehaviour
         GameManagerNB.OnGamesPlayerBChanged -= HandleOnGamesPlayerBChanged;
     }
 
-    private void HandleOnPointsPlayerAChanged(int obj)
+    private void HandleOnPointsPlayerAChanged(int points)
     {
-        throw new NotImplementedException();
+        pointsPlayerAText.text = FormatTennisPoints(points);
     }
 
-    private void HandleOnPointsPlayerBChanged(int obj)
+    private void HandleOnPointsPlayerBChanged(int points)
     {
-        throw new NotImplementedException();
+        pointsPlayerBText.text = FormatTennisPoints(points);
     }
 
-    private void HandleOnGamesPlayerBChanged(int obj)
+    private void HandleOnGamesPlayerAChanged(int games)
     {
-        throw new NotImplementedException();
+        gamesPlayerAText.text = games.ToString();
     }
 
-    private void HandleOnGamesPlayerAChanged(int obj)
+    private void HandleOnGamesPlayerBChanged(int games)
     {
-        throw new NotImplementedException();
+        gamesPlayerBText.text = games.ToString();
     }
 
-
+    private string FormatTennisPoints(int points)
+    {
+        return points switch
+        {
+            0 => "0",
+            1 => "15",
+            2 => "30",
+            3 => "40",
+            _ => "AD"
+        };
+    }
 
 
     private void HandleOnThisPlayerIsReady()
     {
-        panelWaitForPlayerReady.GetComponentInChildren<TextMeshProUGUI>().text = waitForOtherPlayerReadyText;
+        panelWaitForPlayerReady.GetComponentInChildren<TextMeshProUGUI>().text = waitForOtherPlayerReadyMessage;
     }
 
     private void HandleOnGameStateChanged(GameState newGameState)
@@ -94,7 +115,7 @@ public class UIManager : MonoBehaviour
             case GameState.WaitingForAllPlayersReady:
                 SetPanelOn(PanelsOnScreen.WaitingForAllPlayersReady);
                 break;
-            case GameState.Playing:
+            case GameState.PlayingServe:
                 SetPanelOn(PanelsOnScreen.Playing);
                 break;
             case GameState.Paused:

@@ -23,11 +23,26 @@ public class MatchManagerSO : ScriptableObject
 
     // Variables
     private BallController currentBallController;
+    private GameManagerNB gameManager;
 
     // Events
     public event Action<Vector3> OnShotBall;
     public event Action OnThisPlayerIsReady;
+    public event Action<ulong> OnPlayerIsReady;
 
+
+    public void RegisterGameManager(GameManagerNB gameManager)
+    {
+        this.gameManager = gameManager;
+    }
+
+    public GameState GetServerGameState()
+    {
+        if (gameManager == null)
+            throw new Exception("GameManager not registered");
+
+        return gameManager.CurrentGameState;
+    }
 
     public void SetCurrentBallController(BallController ballController)
     {
@@ -88,4 +103,8 @@ public class MatchManagerSO : ScriptableObject
             return CourtSides.North;
     }
 
+    internal void NotifyPlayerReady(ulong ownerClientId)
+    {
+        OnPlayerIsReady?.Invoke(ownerClientId);
+    }
 }

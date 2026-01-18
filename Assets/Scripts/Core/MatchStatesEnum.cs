@@ -2,7 +2,8 @@ public enum GameState
 {
     WaitingForAllPlayersConnected,
     WaitingForAllPlayersReady,
-    Playing,
+    PlayingServe,
+    PlayingRally,
     Finished,
     Paused
 }

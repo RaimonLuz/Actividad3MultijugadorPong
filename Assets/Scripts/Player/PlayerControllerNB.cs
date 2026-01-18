@@ -18,43 +18,49 @@ public class PlayerControllerNB : NetworkBehaviour
     [SerializeField][Range(1f, 10f)] float hitRange = 5f;
 
     // Networked variables
+    //... Player Side
+    private NetworkVariable<Players> nv_Player = new(
+        Players.PlayerA,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
     //... Visual Type
-    public NetworkVariable<PlayerVisualType> NV_VisualType = new(
+    private NetworkVariable<PlayerVisualType> nv_VisualType = new(
         PlayerVisualType.Blue,
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
-    //... Court Side
-    public NetworkVariable<CourtSides> NV_playerCourtSide = new(
-        default,
-        NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Server
-    );
-    //... Player is ready?
-    public NetworkVariable<bool> NV_IsReady = new(
-        false,
-        NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Server
-    );
-    //... Game State PRIVATE, it is a reference to the GameManagerNB's game state variable
-    private NetworkVariable<GameState> nV_gameState_Ref = new(
-        GameState.WaitingForAllPlayersConnected,
-        NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Server
-    );
 
+    public void AsignVisual(PlayerVisualType visualType)
+    {
+        if (IsServer)
+        {
+            // Assign visual based on player side
+            if (nv_Player.Value == Players.PlayerA)
+            {
+                nv_VisualType.Value = PlayerVisualType.Blue;
+            }
+            else
+            {
+                nv_VisualType.Value = PlayerVisualType.Red;
+            }
+        }
+    }
 
+    // static events
+    public static event Action<Players> OnLocalPlayerIdentified;
 
     // variables
-    private GameState cachedGameState;
     private Vector3 verticalVelocity;
     private Transform cameraTransform;
     private InputController inputController;
     private CharacterController characterController;
     private BallController ballController => matchManagerSO.GetCurrentBallController();
 
+    // properties, getters
     public float MaxMoveSpeed { get => maxMoveSpeed; }
-    public GameState CachedGameState { get => cachedGameState; }
+    public Players Player { get => nv_Player.Value; }
+
 
     private void Awake()
     {
@@ -71,12 +77,10 @@ public class PlayerControllerNB : NetworkBehaviour
     private void OnEnable()
     {
         inputController.OnShot += HandleOnShot;
-        GameManagerNB.OnGameStateChanged += HandleOnGameStateChanged;
     }
     private void OnDisable()
     {
         inputController.OnShot -= HandleOnShot;
-        GameManagerNB.OnGameStateChanged -= HandleOnGameStateChanged;
     }
 
     // Update is called once per frame
@@ -93,32 +97,28 @@ public class PlayerControllerNB : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         // Subscribe to visual type changes
-        NV_VisualType.OnValueChanged += OnVisualChanged;
-        OnVisualChanged(NV_VisualType.Value, NV_VisualType.Value);
+        nv_VisualType.OnValueChanged += OnVisualChanged;
+        nv_Player.OnValueChanged += OnPlayerChanged;
 
-        // Subscribe to ready state changes (only for owner)
-        if (IsOwner)
-        {
-            NV_IsReady.OnValueChanged += HandleReadyChanged;
-        }
+        OnVisualChanged(nv_VisualType.Value, nv_VisualType.Value);
     }
 
     public override void OnNetworkDespawn()
     {
         // Unsubscribe from visual type changes
-        NV_VisualType.OnValueChanged -= OnVisualChanged;
-
-        // Unsubscribe from ready state changes (only for owner)
-        if (IsOwner)
-        {
-            NV_IsReady.OnValueChanged -= HandleReadyChanged;
-        }
+        nv_VisualType.OnValueChanged -= OnVisualChanged;
+        nv_Player.OnValueChanged -= OnPlayerChanged;
     }
 
-    public void InitGameState(NetworkVariable<GameState> gameState)
+
+
+    private void OnPlayerChanged(Players previousValue, Players newValue)
     {
-        if (!IsServer) return;
-        nV_gameState_Ref = gameState;
+        // If this is the local player, notify via event
+        if (IsOwner)
+        {
+            OnLocalPlayerIdentified?.Invoke(newValue);
+        }
     }
 
     private void HandleReadyChanged(bool oldValue, bool newValue)
@@ -134,11 +134,6 @@ public class PlayerControllerNB : NetworkBehaviour
         }
     }
 
-    private void HandleOnGameStateChanged(GameState newState)
-    {
-        cachedGameState = newState;
-    }
-
     
 
     private void OnVisualChanged(PlayerVisualType oldVal, PlayerVisualType newVal)
@@ -150,11 +145,18 @@ public class PlayerControllerNB : NetworkBehaviour
     [ServerRpc]
     private void MovePlayerServerRpc(Vector2 input, ServerRpcParams rpcParams = default)
     {
-        if (nV_gameState_Ref.Value == GameState.WaitingForAllPlayersConnected)
+        GameState gameState = matchManagerSO.GetServerGameState();
+
+        if (gameState == GameState.WaitingForAllPlayersConnected)
         {
             RotatePlayer(input);
         }
-        else if (nV_gameState_Ref.Value == GameState.Playing)
+        else if (gameState == GameState.PlayingServe)
+        {
+            // Don't move during serve
+            return;
+        }
+        else if (gameState == GameState.PlayingRally)
         {
             MovePlayer(input);
         }
@@ -228,24 +230,29 @@ public class PlayerControllerNB : NetworkBehaviour
             characterController.Move(correction);
     }
 
+    // FIXME : refactor this method to separate concerns SERVER/CLIENT
     private void HandleOnShot()
     {
+
         // Only the owner of this object should handle shots
         if (!IsOwner) return;
+        
+        GameState gameState = matchManagerSO.GetServerGameState();
 
         // When not playing, set player as ready
-        if (cachedGameState == GameState.WaitingForAllPlayersReady && NV_IsReady.Value == false)
+        if (gameState == GameState.WaitingForAllPlayersReady && nv_IsReady.Value == false)
         {
-            RequestReadyServerRpc();
+            SendPlayerReadyToServerRpc();
             return;
         }
 
-        if(cachedGameState == GameState.Playing)
+        if (gameState == GameState.PlayingServe)
         {
             TryHitBall();
         }
     }
 
+    // FIXME : Refactor this method to separate concerns SERVER/CLIENT
     void TryHitBall()
     {
 
@@ -264,12 +271,10 @@ public class PlayerControllerNB : NetworkBehaviour
     }
 
     [ServerRpc]
-    private void RequestReadyServerRpc(ServerRpcParams rpcParams = default)
+    private void SendPlayerReadyToServerRpc(ServerRpcParams rpcParams = default)
     {
-        if (NV_IsReady.Value)
-            return;
-
-        NV_IsReady.Value = true;
+        Debug.Log("Player requested to be ready.");
+        matchManagerSO.NotifyPlayerReady(OwnerClientId);
     }
 
     Vector3 GetTargetPoint()
