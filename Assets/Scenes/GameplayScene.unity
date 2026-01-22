@@ -570,8 +570,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.064455636, y: -0.70416296, z: 0.064455636, w: 0.70416296}
-  m_LocalPosition: {x: 14.5, y: 6.14, z: 0}
+  m_LocalRotation: {x: 0.24327642, y: 0, z: 0, w: 0.96995705}
+  m_LocalPosition: {x: 0, y: 6.14, z: -14.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2994,16 +2994,6 @@ MonoBehaviour:
   southSpawn: {fileID: 971474004}
   serverNorthSpawn: {fileID: 894588240}
   serverSouthSpawn: {fileID: 948358135}
-  NV_ServerSide:
-    m_InternalValue: 0
-  NV_PointsPlayerA:
-    m_InternalValue: 0
-  NV_PointsPlayerB:
-    m_InternalValue: 0
-  NV_GamesPlayerA:
-    m_InternalValue: 0
-  NV_GamesPlayerB:
-    m_InternalValue: 0
 --- !u!1 &1532015392
 GameObject:
   m_ObjectHideFlags: 0

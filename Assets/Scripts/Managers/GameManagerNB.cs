@@ -20,8 +20,6 @@ public class GameManagerNB : NetworkBehaviour
     // private Variables
     private int currentPlayerCount = 0;
     private Dictionary<ulong, GameObject> spawnedPlayers = new(); // Track spawned players by their client IDs
-    private Dictionary<ulong, bool> playerReady = new Dictionary<ulong, bool>();
-
 
     // Network Variables
     private NetworkVariable<GameState> nv_GameState =
@@ -72,7 +70,11 @@ public class GameManagerNB : NetworkBehaviour
     public static event Action<int> OnGamesPlayerAChanged;
     public static event Action<int> OnGamesPlayerBChanged;
 
-
+    private void Awake()
+    {
+        // Register this game manager in the match manager scriptable object
+        matchManagerSO.RegisterGameManager(this);
+    }
 
 
     public override void OnNetworkSpawn()
@@ -95,9 +97,6 @@ public class GameManagerNB : NetworkBehaviour
             // Only the server should handle client connections
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
-
-            // Register this game manager in the match manager scriptable object
-            matchManagerSO.RegisterGameManager(this);
         }
     }
 
@@ -210,7 +209,7 @@ public class GameManagerNB : NetworkBehaviour
 
         PlayerControllerNB playerController = playerObj.GetComponent<PlayerControllerNB>();
         // Set the player's value
-        playerController.NV_Player.Value = player;
+        playerController.AsignPlayer(player);
         // Set the player's visual type
         playerController.AsignVisual(visualType);
 
@@ -233,7 +232,11 @@ public class GameManagerNB : NetworkBehaviour
         if (!IsServer)
             return;
 
-        playerReady[clientId] = true;
+        // Set the player's ready state to true
+        spawnedPlayers[clientId].GetComponent<PlayerControllerNB>().SetReadyState(true);
+
+        // Check if all players are ready
+        CheckAllPlayersReady();
     }
 
     private void CheckAllPlayersReady()
@@ -246,9 +249,9 @@ public class GameManagerNB : NetworkBehaviour
             return;
 
         // Check if all players are ready
-        foreach (bool isPlayerReady in playerReady.Values)
+        foreach (var player in spawnedPlayers.Values)
         {
-            if (isPlayerReady == false)
+            if (player.GetComponent<PlayerControllerNB>().IsReady() == false)
                 return;
         }
 

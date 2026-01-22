@@ -30,6 +30,34 @@ public class PlayerControllerNB : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
+    //... Is Ready
+    private NetworkVariable<bool> nv_IsReady = new(
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
+
+    public void SetReadyState(bool isReady)
+    {
+        if (IsServer)
+        {
+            nv_IsReady.Value = isReady;
+        }
+    }
+
+    public bool IsReady()
+    {
+        return nv_IsReady.Value;
+    }
+
+    public void AsignPlayer(Players player)
+    {
+        if (IsServer)
+        {
+            nv_Player.Value = player;
+        }
+    }
 
     public void AsignVisual(PlayerVisualType visualType)
     {
@@ -55,6 +83,7 @@ public class PlayerControllerNB : NetworkBehaviour
     private Transform cameraTransform;
     private InputController inputController;
     private CharacterController characterController;
+    private LocalPlayerPredictionMoventController localPlayerPredictionMovent;
     private BallController ballController => matchManagerSO.GetCurrentBallController();
 
     // properties, getters
@@ -65,6 +94,7 @@ public class PlayerControllerNB : NetworkBehaviour
     private void Awake()
     {
         inputController = GetComponent<InputController>();
+        localPlayerPredictionMovent = GetComponent<LocalPlayerPredictionMoventController>();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -89,8 +119,24 @@ public class PlayerControllerNB : NetworkBehaviour
         // Only the owner of this object should control its movement
         if (!IsOwner) return;
 
+        // Get input
         Vector2 input = inputController.MoveInput;
+
+        // Send movement to server
         MovePlayerServerRpc(input);
+
+        // Local prediction
+        if (matchManagerSO.GetServerGameState() == GameState.PlayingRally)
+        {
+            if (localPlayerPredictionMovent != null)
+            {
+                localPlayerPredictionMovent.PredictMove(input);
+            }
+            else
+            {
+                Debug.LogWarning("LocalPlayerPredictionMoventController component is missing.");
+            }
+        }
     }
 
     // This method is called when the object is spawned on the network
@@ -99,6 +145,7 @@ public class PlayerControllerNB : NetworkBehaviour
         // Subscribe to visual type changes
         nv_VisualType.OnValueChanged += OnVisualChanged;
         nv_Player.OnValueChanged += OnPlayerChanged;
+        nv_IsReady.OnValueChanged += HandleReadyChanged;
 
         OnVisualChanged(nv_VisualType.Value, nv_VisualType.Value);
     }
@@ -108,6 +155,7 @@ public class PlayerControllerNB : NetworkBehaviour
         // Unsubscribe from visual type changes
         nv_VisualType.OnValueChanged -= OnVisualChanged;
         nv_Player.OnValueChanged -= OnPlayerChanged;
+        nv_IsReady.OnValueChanged -= HandleReadyChanged;
     }
 
 
