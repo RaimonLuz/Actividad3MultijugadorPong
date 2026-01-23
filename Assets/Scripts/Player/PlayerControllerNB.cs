@@ -86,7 +86,7 @@ public class PlayerControllerNB : NetworkBehaviour
     private InputController inputController;
     private CharacterController characterController;
     private LocalPlayerPredictionMoventController localPlayerPredictionMovent;
-    private BallController ballController => matchManagerSO.GetCurrentBallController();
+    private BallControllerNB ballController => matchManagerSO.GetCurrentBallController();
 
     // properties, getters
     public float MaxMoveSpeed { get => maxMoveSpeed; }

@@ -22,7 +22,7 @@ public class MatchManagerSO : ScriptableObject
     public const float COURT_GROUND_Y = 0f;
 
     // Variables
-    private BallController currentBallController;
+    private BallControllerNB currentBallController;
     private GameManagerNB gameManager;
 
     // Events
@@ -44,7 +44,7 @@ public class MatchManagerSO : ScriptableObject
         return gameManager.CurrentGameState;
     }
 
-    public void SetCurrentBallController(BallController ballController)
+    public void SetCurrentBallController(BallControllerNB ballController)
     {
         if(currentBallController == null)
         {
@@ -53,7 +53,7 @@ public class MatchManagerSO : ScriptableObject
     }
 
 
-    public BallController GetCurrentBallController() 
+    public BallControllerNB GetCurrentBallController() 
     { 
         return currentBallController;
     }

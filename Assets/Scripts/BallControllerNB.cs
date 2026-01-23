@@ -1,7 +1,8 @@
 using TMPro;
 using UnityEngine;
+using Unity.Netcode;
 
-public class BallController : MonoBehaviour
+public class BallControllerNB : NetworkBehaviour
 {
 
     [SerializeField] private MatchManagerSO matchManagerSO;
@@ -29,6 +30,19 @@ public class BallController : MonoBehaviour
     {
         matchManagerSO.OnShotBall -= HandleShotBall;
     }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+        {
+            rb.isKinematic = false; // real physics in server
+        }
+        else
+        {
+            rb.isKinematic = true;  // only transform
+        }
+    }
+
 
     private void HandleShotBall(Vector3 targetPosition)
     {
