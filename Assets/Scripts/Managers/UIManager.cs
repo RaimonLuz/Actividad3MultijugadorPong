@@ -22,7 +22,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI hudHintText;
 
     [Header("Texts")]
-    [SerializeField][Multiline] private string waitForOtherPlayerReadyMessage = "¡Genial estás apunto! Espera a que el otro jugador esté listo...";
+    [SerializeField][Multiline] private string waitForOtherPlayerReadyMessage = "ï¿½Genial estï¿½s apunto! Espera a que el otro jugador estï¿½ listo...";
     [SerializeField][Multiline] private string waitForOtherPlayerServeMessage = "Esperando a que el otro jugador saque";
     [SerializeField][Multiline] private string playerMustServeMessage = "Pulsa Space para sacar";
 

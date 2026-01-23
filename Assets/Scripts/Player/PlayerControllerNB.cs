@@ -1,5 +1,6 @@
 using HathoraCloud.Models.Operations;
 using System;
+using System.Collections;
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEditor;
@@ -36,6 +37,7 @@ public class PlayerControllerNB : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
+    
 
 
     public void SetReadyState(bool isReady)

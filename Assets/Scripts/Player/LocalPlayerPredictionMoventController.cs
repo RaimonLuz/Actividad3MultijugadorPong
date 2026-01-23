@@ -12,7 +12,6 @@ public class LocalPlayerPredictionMoventController : MonoBehaviour
     private void Awake()
     {
         serverRoot = transform.parent;
-        input = GetComponentInParent<InputController>();
         playerController = GetComponentInParent<PlayerControllerNB>();
     }
 
