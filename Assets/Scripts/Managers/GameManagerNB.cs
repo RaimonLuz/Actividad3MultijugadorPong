@@ -69,6 +69,7 @@ public class GameManagerNB : NetworkBehaviour
     public static event Action<int> OnPointsPlayerBChanged;
     public static event Action<int> OnGamesPlayerAChanged;
     public static event Action<int> OnGamesPlayerBChanged;
+    public static event Action<Players> OnServerSideChanged;
 
     private void Awake()
     {
@@ -87,6 +88,7 @@ public class GameManagerNB : NetworkBehaviour
             nv_PointsPlayerB.OnValueChanged += HandlePointsPlayerBChanged;
             nv_GamesPlayerA.OnValueChanged += HandleGamesPlayerAChanged;
             nv_GamesPlayerB.OnValueChanged += HandleGamesPlayerBChanged;
+            nv_ServerSide.OnValueChanged += HandleServerSideChanged;
 
             // Immediately notify local systems on spawn
             HandleMatchStateChanged(nv_GameState.Value, nv_GameState.Value);
@@ -109,6 +111,7 @@ public class GameManagerNB : NetworkBehaviour
             nv_PointsPlayerB.OnValueChanged -= HandlePointsPlayerBChanged;
             nv_GamesPlayerA.OnValueChanged -= HandleGamesPlayerAChanged;
             nv_GamesPlayerB.OnValueChanged -= HandleGamesPlayerBChanged;
+            nv_ServerSide.OnValueChanged -= HandleServerSideChanged;
         }
 
         if (IsServer)
@@ -141,6 +144,11 @@ public class GameManagerNB : NetworkBehaviour
         // Remove the player object from the dictionary and decrement player count
         spawnedPlayers.Remove(clientId);
         currentPlayerCount--;
+    }
+
+    private void HandleServerSideChanged(Players oldValue, Players newValue)
+    {
+        OnServerSideChanged?.Invoke(newValue);
     }
 
 

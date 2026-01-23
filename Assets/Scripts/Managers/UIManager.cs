@@ -27,6 +27,8 @@ public class UIManager : MonoBehaviour
     [SerializeField][Multiline] private string playerMustServeMessage = "Pulsa Space para sacar";
 
 
+    private Players localPlayer;
+
     private enum PanelsOnScreen
     {
         WaitingForAllPlayersConnected,
@@ -53,6 +55,8 @@ public class UIManager : MonoBehaviour
         GameManagerNB.OnPointsPlayerBChanged += HandleOnPointsPlayerBChanged;
         GameManagerNB.OnGamesPlayerAChanged += HandleOnGamesPlayerAChanged;
         GameManagerNB.OnGamesPlayerBChanged += HandleOnGamesPlayerBChanged;
+        PlayerControllerNB.OnLocalPlayerIdentified += HandleLocalPlayerIdentified;
+        GameManagerNB.OnServerSideChanged += HandleServerSideChanged;
     }
     private void OnDisable()
     {
@@ -65,11 +69,33 @@ public class UIManager : MonoBehaviour
         GameManagerNB.OnPointsPlayerBChanged -= HandleOnPointsPlayerBChanged;
         GameManagerNB.OnGamesPlayerAChanged -= HandleOnGamesPlayerAChanged;
         GameManagerNB.OnGamesPlayerBChanged -= HandleOnGamesPlayerBChanged;
+        PlayerControllerNB.OnLocalPlayerIdentified -= HandleLocalPlayerIdentified;
+        GameManagerNB.OnServerSideChanged -= HandleServerSideChanged;
+    }
+
+    private void HandleLocalPlayerIdentified(Players player)
+    {
+        localPlayer = player;
     }
 
     private void HandleOnPointsPlayerAChanged(int points)
     {
         pointsPlayerAText.text = FormatTennisPoints(points);
+    }
+
+    private void HandleServerSideChanged(Players serverPlayer)
+    {
+        if (matchManagerSO.GetGameState() != GameState.PlayingServe)
+            return;
+
+        if (serverPlayer == localPlayer)
+        {
+            hudHintText.text = playerMustServeMessage;
+        }
+        else
+        {
+            hudHintText.text = waitForOtherPlayerServeMessage;
+        }
     }
 
     private void HandleOnPointsPlayerBChanged(int points)

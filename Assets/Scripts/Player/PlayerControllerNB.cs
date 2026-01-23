@@ -128,7 +128,7 @@ public class PlayerControllerNB : NetworkBehaviour
         MovePlayerServerRpc(input);
 
         // Local prediction
-        if (matchManagerSO.GetServerGameState() == GameState.PlayingRally)
+        if (matchManagerSO.GetGameState() == GameState.PlayingRally)
         {
             if (localPlayerPredictionMovent != null)
             {
@@ -195,9 +195,9 @@ public class PlayerControllerNB : NetworkBehaviour
     [ServerRpc]
     private void MovePlayerServerRpc(Vector2 input, ServerRpcParams rpcParams = default)
     {
-        GameState gameState = matchManagerSO.GetServerGameState();
+        GameState gameState = matchManagerSO.GetGameState();
 
-        if (gameState == GameState.WaitingForAllPlayersConnected)
+        if (gameState == GameState.WaitingForAllPlayersConnected || gameState == GameState.WaitingForAllPlayersReady)
         {
             RotatePlayer(input);
         }
@@ -287,7 +287,7 @@ public class PlayerControllerNB : NetworkBehaviour
         // Only the owner of this object should handle shots
         if (!IsOwner) return;
         
-        GameState gameState = matchManagerSO.GetServerGameState();
+        GameState gameState = matchManagerSO.GetGameState();
 
         // When not playing, set player as ready
         if (gameState == GameState.WaitingForAllPlayersReady && nv_IsReady.Value == false)

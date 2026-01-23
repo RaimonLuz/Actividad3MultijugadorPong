@@ -36,7 +36,7 @@ public class MatchManagerSO : ScriptableObject
         this.gameManager = gameManager;
     }
 
-    public GameState GetServerGameState()
+    public GameState GetGameState()
     {
         if (gameManager == null)
             throw new Exception("GameManager not registered");

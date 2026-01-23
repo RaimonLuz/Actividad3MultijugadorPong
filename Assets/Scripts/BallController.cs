@@ -4,7 +4,7 @@ using UnityEngine;
 public class BallController : MonoBehaviour
 {
 
-    [SerializeField] private MatchManagerSO gameManagerSO;
+    [SerializeField] private MatchManagerSO matchManagerSO;
 
     const float NET_HEIGHT_WITH_MARGIN = MatchManagerSO.NET_HEIGHT + 2f;
     private Rigidbody rb;
@@ -12,7 +12,7 @@ public class BallController : MonoBehaviour
 
     private void Awake()
     {
-        gameManagerSO.SetCurrentBallController(this);
+        matchManagerSO.SetCurrentBallController(this);
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -23,11 +23,11 @@ public class BallController : MonoBehaviour
 
     private void OnEnable()
     {
-        gameManagerSO.OnShotBall += HandleShotBall;
+        matchManagerSO.OnShotBall += HandleShotBall;
     }
     private void OnDisable()
     {
-        gameManagerSO.OnShotBall -= HandleShotBall;
+        matchManagerSO.OnShotBall -= HandleShotBall;
     }
 
     private void HandleShotBall(Vector3 targetPosition)
