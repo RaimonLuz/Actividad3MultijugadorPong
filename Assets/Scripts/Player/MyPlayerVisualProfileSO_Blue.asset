@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edb80e04e773a4f45b4e719377f77f4e, type: 3}
+  m_Name: MyPlayerVisualProfileSO_Blue
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerVisualProfileSO
+  type: 0
+  bodyMaterial: {fileID: 2100000, guid: b2c0809b8b12e014bb55c0075d1f31f0, type: 2}
+  bodyMesh: {fileID: 0}
+  animator: {fileID: 0}
