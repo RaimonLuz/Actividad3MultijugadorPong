@@ -102,6 +102,70 @@ public class GameManagerNB : NetworkBehaviour
         }
     }
 
+    public Players GetServerSide() => nv_ServerSide.Value;
+
+    public void AddPoint(Players winner)
+    {
+        if (!IsServer) return;
+
+        if (winner == Players.PlayerA) nv_PointsPlayerA.Value++;
+        else nv_PointsPlayerB.Value++;
+
+        // reset pelota
+        ResetBall();
+
+        // cambia servidor
+        SwitchServer();
+
+        ChangeGameState(GameState.PlayingServe);
+    }
+
+    private void ChangeGameState(GameState newState)
+    {
+        if (!IsServer)
+            return;
+
+        nv_GameState.Value = newState;
+
+        Debug.Log($"newState:{newState}");
+
+        if (newState == GameState.PlayingServe)
+        {
+            PlaceBallForServe();
+        }
+    }
+
+    private void PlaceBallForServe()
+    {
+        var ball = matchManagerSO.GetCurrentBallController();
+        if (ball == null) return;
+
+        foreach (var playerObj in spawnedPlayers.Values)
+        {
+            var player = playerObj.GetComponent<PlayerControllerNB>();
+            if (player.Player == nv_ServerSide.Value)
+            {
+                ball.PlaceForServe(player.transform);
+                break;
+            }
+        }
+    }
+
+    private void ResetBall()
+    {
+        var ball = matchManagerSO.GetCurrentBallController();
+        ball.transform.position = Vector3.up * 1.5f;
+        ball.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
+    }
+
+    public void StartRally()
+    {
+        Debug.Log($"StartRally called");
+
+        if (!IsServer) return;
+        ChangeGameState(GameState.PlayingRally);
+    }
+
     public override void OnNetworkDespawn()
     {
         if (IsClient)
@@ -294,14 +358,6 @@ public class GameManagerNB : NetworkBehaviour
         ChangeGameState(GameState.PlayingServe);
     }
 
-    private void ChangeGameState(GameState newState)
-    {
-        if (!IsServer)
-            return;
-
-        Debug.Log($"Game State changed to: {newState}");
-        nv_GameState.Value = newState;
-    }
 
     private void OnGameWon(Players winner)
     {

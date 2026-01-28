@@ -104,7 +104,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61d597a63ff17534aa8ca2fe9fba5fb8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LocalPlayerPredictionMoventController
-  ShowTopMostFoldoutHeaderGroup: 1
   reconciliationLerpSpeed: 15
 --- !u!114 &5797832631921312632
 MonoBehaviour:
@@ -118,7 +117,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df76c98e5b81b5746a6e511365aa98d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerVisual
-  ShowTopMostFoldoutHeaderGroup: 1
   playerVisualDatabaseSO: {fileID: 11400000, guid: d119848ebef8f164eb9bbc35540eb017, type: 2}
   eyesMeshRenderer: {fileID: 5127323212796471989}
 --- !u!1 &6669797141403170977
@@ -170,7 +168,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 4294277501
+  GlobalObjectIdHash: 1838056534
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -246,12 +244,6 @@ MonoBehaviour:
   matchManagerSO: {fileID: 11400000, guid: fe4c683ca7c5edc48967a29566d78f6e, type: 2}
   maxMoveSpeed: 5
   hitRange: 3
-  NV_VisualType:
-    m_InternalValue: 0
-  NV_playerCourtSide:
-    m_InternalValue: 0
-  NV_IsReady:
-    m_InternalValue: 0
 --- !u!114 &4357705016599973196
 MonoBehaviour:
   m_ObjectHideFlags: 0

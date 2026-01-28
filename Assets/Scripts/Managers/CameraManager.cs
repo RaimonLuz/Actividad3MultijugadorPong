@@ -16,6 +16,7 @@ public class CameraManager : MonoBehaviour
 
     // Variables
     private Players localPlayer = Players.PlayerA;
+    private bool localPlayerKnown = false;
 
 
     private void OnEnable()
@@ -63,30 +64,34 @@ public class CameraManager : MonoBehaviour
     {
         Debug.Log($"CameraManager - Local player identified: {player}");
         localPlayer = player;
+        localPlayerKnown = true;
     }
 
     private void ChangeCameraView(CamerasViewsEnum cameraView)
     {
-
-        // Deactivate all cameras
         northPlayerCamera.Priority = CAMERA_PRIORITY_LOW;
         southPlayerCamera.Priority = CAMERA_PRIORITY_LOW;
         eastMainCamera.Priority = CAMERA_PRIORITY_LOW;
 
-        // Activate the selected camera
+        Transform activeCameraTransform = null;
+
         switch (cameraView)
         {
             case CamerasViewsEnum.NorthPlayer:
                 northPlayerCamera.Priority = CAMERA_PRIORITY_HIGH;
+                activeCameraTransform = northPlayerCamera.transform;
                 break;
 
             case CamerasViewsEnum.SouthPlayer:
                 southPlayerCamera.Priority = CAMERA_PRIORITY_HIGH;
+                activeCameraTransform = southPlayerCamera.transform;
                 break;
 
             case CamerasViewsEnum.EastMain:
                 eastMainCamera.Priority = CAMERA_PRIORITY_HIGH;
+                activeCameraTransform = eastMainCamera.transform;
                 break;
         }
     }
+
 }

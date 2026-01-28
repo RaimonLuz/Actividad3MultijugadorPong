@@ -81,4 +81,32 @@ public class BallControllerNB : NetworkBehaviour
 
         return velocityXZ + velocityY;
     }
+
+    public void PlaceForServe(Transform serverPlayerTransform)
+    {
+        if (!IsServer) return;
+
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        Vector3 offset = serverPlayerTransform.forward * 1.2f;
+        offset.y = 1.2f;
+
+        transform.position = serverPlayerTransform.position + offset;
+    }
+
+    private void FixedUpdate()
+    {
+        if (!IsServer) return;
+
+        // cayó al suelo
+        if (transform.position.y <= MatchManagerSO.COURT_GROUND_Y - 1f)
+        {
+            CourtSides side = MatchManagerSO.GetCourtSideFromPosition(transform.position);
+            Players winner =
+                side == CourtSides.North ? Players.PlayerB : Players.PlayerA;
+
+            matchManagerSO.NotifyPoint(winner);
+        }
+    }
 }

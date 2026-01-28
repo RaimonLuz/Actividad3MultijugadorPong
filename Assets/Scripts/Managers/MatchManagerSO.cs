@@ -107,4 +107,19 @@ public class MatchManagerSO : ScriptableObject
     {
         OnPlayerIsReady?.Invoke(ownerClientId);
     }
+
+    public Players GetCurrentServerPlayer()
+    {
+        return gameManager.GetServerSide();
+    }
+
+    public void RequestStartRally()
+    {
+        gameManager.StartRally();
+    }
+
+    public void NotifyPoint(Players winner)
+    {
+        gameManager.AddPoint(winner);
+    }
 }
